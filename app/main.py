@@ -28,21 +28,36 @@ def main():
     # request_api_key, request_api_version = struct.unpack_from(">HH", buffer=data, offset=offset)
     # offset+=4
     # print(f"request_api_key {request_api_key} and request_api_version {request_api_version}")
-    # correlation_id = struct.unpack_from('>I', buffer=data, offset=8)
+    correlation_id = struct.unpack_from('>I', buffer=data, offset=8)
     # print(f"correlation_id {correlation_id}")
     # print(f"data from client {data.decode()}")
     # conn.sendall(b"hello from the server side")
     # conn.sendall(message[0].to_bytes(4, signed=True) + correlation_id[0].to_bytes(4, signed=True) + (35).to_bytes(2, signed=True))
-    conn.sendall((req_values['message_size']).to_bytes(4, signed=True)
-                 + (req_values['correlation_id']).to_bytes(4, signed=True)
-                 + (0).to_bytes(2, signed=True) # error code
-                 + (1).to_bytes(4, signed=True) # num_api_keys
-                 + (18).to_bytes(2, signed=True) # api_key
-                 + (0).to_bytes(2, signed=True) # min_version
-                 + (4).to_bytes(2, signed=True) # max_version
-                 # + (0).to_bytes(1, signed=True) # TAG_BUFFER
-                 + (0).to_bytes(4, signed=True) )# throttle_time_ms
-                 # + (0).to_bytes(1, signed=True) ) # TAG_BUFFER
+    # conn.sendall((req_values['message_size']).to_bytes(4, signed=True)
+    #              + (req_values['correlation_id']).to_bytes(4, signed=True)
+    #              + (0).to_bytes(2, signed=True) # error code
+    #              + (1).to_bytes(4, signed=True) # num_api_keys
+    #              + (18).to_bytes(2, signed=True) # api_key
+    #              + (0).to_bytes(2, signed=True) # min_version
+    #              + (4).to_bytes(2, signed=True) # max_version
+    #              # + (0).to_bytes(1, signed=True) # TAG_BUFFER
+    #              + (0).to_bytes(4, signed=True) )# throttle_time_ms
+    #              # + (0).to_bytes(1, signed=True) ) # TAG_BUFFER
+    response_body = struct.pack(
+        ">i h i h h h i",   # correlation_id, error_code, num_api_keys, api_key, min_ver, max_ver, throttle_time_ms
+        correlation_id[0],
+        0,                 # error_code = 0 (success)
+        1,                 # num_api_keys
+        18,                # api_key = ApiVersions
+        0,                 # min_version
+        4,                 # max_version
+        0                  # throttle_time_ms
+    )
+
+    # Length prefix
+    response = struct.pack(">i", len(response_body)) + response_body
+    conn.sendall(response)
+
     conn.close()
 
 
