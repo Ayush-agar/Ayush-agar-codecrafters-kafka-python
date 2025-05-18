@@ -43,22 +43,23 @@ def main():
     #              # + (0).to_bytes(1, signed=True) # TAG_BUFFER
     #              + (0).to_bytes(4, signed=True) )# throttle_time_ms
     #              # + (0).to_bytes(1, signed=True) ) # TAG_BUFFER
+    correlation_id = correlation_id[0]  # example from your hexdump
+    error_code = 0
+    throttle_time_ms = 0
+    num_api_keys = 1
+    api_key = 18
+    min_version = 0
+    max_version = 4
+    api_key_bytes = struct.pack(">hhhB", api_key, min_version, max_version, 0x00)
+    response_tag_buffer = b'\x00'
     body = struct.pack(
-        ">h i i h h h",
-        0,  # error_code
-        0,  # throttle_time_ms
-        1,  # num_api_keys
-        18,  # api_key
-        0,  # min_version
-        4  # max_version
-    ) + b'\x00'  # api_keys TAG_BUFFER empty
-
-    # Add empty response TAG_BUFFER
-    body += b'\x00'
-
-    response_body = struct.pack(">i", correlation_id[0]) + body
+        ">h i i",
+        error_code,
+        throttle_time_ms,
+        num_api_keys
+    ) + api_key_bytes + response_tag_buffer
+    response_body = struct.pack(">i", correlation_id) + body
     response = struct.pack(">i", len(response_body)) + response_body
-
     conn.sendall(response)
 
     conn.close()
