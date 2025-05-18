@@ -1,70 +1,45 @@
-import socket
-NO_ERROR = 0
-class RequestValidationException(Exception):
-    code: int
-    message: str
-class ApiVersionInvalidException(RequestValidationException):
-    code = 35
-    message = "UNSUPPORTED_VERSION"
-class Request:
-    request_api_key: int
-    request_api_version: int
-    correlation_id: int
-    client_id: str | None
-    tagged_fields: list[str] | None
-    def __init__(
-        self,
-        request_api_key: int,
-        request_api_version: int,
-        correlation_id: int,
-        client_id: str,
-    ):
-        self.request_api_key = request_api_key
-        self.request_api_version = request_api_version
-        self.correlation_id = correlation_id
-        self.client_id = client_id
-    def validate(self):
-        if self.request_api_version not in [0, 1, 2, 3, 4]:
-            raise ApiVersionInvalidException
-def parse_request_length(header: bytes) -> int:
-    return int.from_bytes(header, byteorder="big", signed=True)
-def parse_request(request: bytes) -> Request:
-    request_api_key = int.from_bytes(request[:2], byteorder="big", signed=True)
-    request_api_version = int.from_bytes(request[2:4], byteorder="big", signed=True)
-    correlation_id = int.from_bytes(request[4:8], byteorder="big", signed=True)
-    client_id = bytes.decode(request[8:], "utf-8")
-    return Request(request_api_key, request_api_version, correlation_id, client_id)
-def create_response(request: Request) -> bytes:
-    message_bytes = request.correlation_id.to_bytes(4, byteorder="big", signed=True)
-    min_version, max_version = 0, 4
-    throttle_time_ms = 0
+import socket  # noqa: F401
+
+
+def main():
+    print("Logs from your program will appear here!")
+    import struct
+    server = socket.create_server(("localhost", 9092), reuse_port=True)
+    conn, raddr = server.accept() # wait for client
+    data = conn.recv(1024)
+    # print(f"data {data}")
+    REQUEST_STRUCT = {
+        "message_size": 4,
+        "request_api_key": 2,
+        "request_api_version": 2,
+        "correlation_id": 4,
+    }
+    REQUEST_SIZE = sum(size for size in REQUEST_STRUCT.values())
+    req_values = dict()
+    offset = 0
+    for k, v in REQUEST_STRUCT.items():
+        value = int.from_bytes(data[offset : offset + v], byteorder="big")
+        req_values[k] = value
+        offset += v
+    print(req_values)
+    correlation_id = struct.unpack_from('>I', buffer=data, offset=8)
     tag_buffer = b"\x00"
-    try:
-        request.validate()
-        error_bytes = NO_ERROR.to_bytes(2, byteorder="big", signed=True)
-    except RequestValidationException as ex:
-        error_bytes = ex.code.to_bytes(2, byteorder="big", signed=True)
-    message_bytes += error_bytes
-    message_bytes += int(2).to_bytes(1, byteorder="big", signed=True)
-    message_bytes += request.request_api_key.to_bytes(2, byteorder="big", signed=True)
-    message_bytes += min_version.to_bytes(2, byteorder="big", signed=True)
-    message_bytes += max_version.to_bytes(2, byteorder="big", signed=True)
-    message_bytes += tag_buffer
-    message_bytes += throttle_time_ms.to_bytes(4, byteorder="big", signed=True)
-    message_bytes += tag_buffer
+    # correlation , error code, num_api_keys, api_key, min_version, max_version, tag_buffer, throttle_time_ms, tag_buffer
+    message_bytes = (((((((((req_values['message_size']).to_bytes(4, signed=True)
+                     + (req_values['correlation_id']).to_bytes(4, signed=True))
+                     + (0).to_bytes(2, signed=True)) + (1).to_bytes(1, signed=True)
+                     + (18).to_bytes(2, signed=True))
+                     + (0).to_bytes(2, signed=True))
+                     + (4).to_bytes(2, signed=True))
+                     + tag_buffer)
+                     + (0).to_bytes(4, signed=True))
+                     + tag_buffer)
     req_len = len(message_bytes).to_bytes(4, byteorder="big", signed=True)
     response = req_len + message_bytes
-    return response
-def main():
-    with socket.create_server(("localhost", 9092), reuse_port=True) as server:
-        while True:
-            client_conn, addr = server.accept()
-            # receive
-            message_len = parse_request_length(client_conn.recv(4))
-            request_bytes = client_conn.recv(message_len + 8)
-            # create response
-            response = create_response(parse_request(request_bytes))
-            # send response
-            client_conn.sendall(response)
+    conn.sendall(response)
+    # conn.close()
+
+
 if __name__ == "__main__":
     main()
+
