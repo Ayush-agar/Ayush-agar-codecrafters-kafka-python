@@ -8,7 +8,7 @@ def main():
         import struct
         server = socket.create_server(("localhost", 9092), reuse_port=True)
         conn, raddr = server.accept() # wait for client
-        data = conn.recv(1024)
+        data = conn.recv(12)
         # print(f"data {data}")
         REQUEST_STRUCT = {
             "message_size": 4,
