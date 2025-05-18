@@ -33,34 +33,35 @@ def main():
     # print(f"data from client {data.decode()}")
     # conn.sendall(b"hello from the server side")
     # conn.sendall(message[0].to_bytes(4, signed=True) + correlation_id[0].to_bytes(4, signed=True) + (35).to_bytes(2, signed=True))
-    # conn.sendall((req_values['message_size']).to_bytes(4, signed=True)
-    #              + (req_values['correlation_id']).to_bytes(4, signed=True)
-    #              + (0).to_bytes(2, signed=True) # error code
-    #              + (1).to_bytes(4, signed=True) # num_api_keys
-    #              + (18).to_bytes(2, signed=True) # api_key
-    #              + (0).to_bytes(2, signed=True) # min_version
-    #              + (4).to_bytes(2, signed=True) # max_version
-    #              # + (0).to_bytes(1, signed=True) # TAG_BUFFER
-    #              + (0).to_bytes(4, signed=True) )# throttle_time_ms
-    #              # + (0).to_bytes(1, signed=True) ) # TAG_BUFFER
-    correlation_id = correlation_id[0]  # example from your hexdump
-    error_code = 0
-    throttle_time_ms = 0
-    num_api_keys = 1
-    api_key = 18
-    min_version = 0
-    max_version = 4
-    api_key_bytes = struct.pack(">hhhB", api_key, min_version, max_version, 0x00)
-    response_tag_buffer = b'\x00'
-    body = struct.pack(
-        ">h i i",
-        error_code,
-        throttle_time_ms,
-        num_api_keys
-    ) + api_key_bytes + response_tag_buffer
-    response_body = struct.pack(">i", correlation_id) + body
-    response = struct.pack(">i", len(response_body)) + response_body
-    conn.sendall(response)
+    tag_buffer = b"\x00"
+    conn.sendall((req_values['message_size']).to_bytes(4, signed=True)
+                 + (req_values['correlation_id']).to_bytes(4, signed=True)
+                 + (0).to_bytes(2, signed=True) # error code
+                 + (1).to_bytes(1, signed=True) # num_api_keys
+                 + (18).to_bytes(2, signed=True) # api_key
+                 + (0).to_bytes(2, signed=True) # min_version
+                 + (4).to_bytes(2, signed=True) # max_version
+                 + tag_buffer # TAG_BUFFER
+                 + (0).to_bytes(4, signed=True)# throttle_time_ms
+                 + tag_buffer) # TAG_BUFFER
+    # correlation_id = correlation_id[0]  # example from your hexdump
+    # error_code = 0
+    # throttle_time_ms = 0
+    # num_api_keys = 1
+    # api_key = 18
+    # min_version = 0
+    # max_version = 4
+    # api_key_bytes = struct.pack(">hhhB", api_key, min_version, max_version, 0x00)
+    # response_tag_buffer = b'\x00'
+    # body = struct.pack(
+    #     ">h i i",
+    #     error_code,
+    #     throttle_time_ms,
+    #     num_api_keys
+    # ) + api_key_bytes + response_tag_buffer
+    # response_body = struct.pack(">i", correlation_id) + body
+    # response = struct.pack(">i", len(response_body)) + response_body
+    # conn.sendall(response)
 
     conn.close()
 
