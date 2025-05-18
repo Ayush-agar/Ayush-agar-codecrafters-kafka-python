@@ -34,7 +34,7 @@ def main():
     req_len = req_values['message_size'].to_bytes(4, byteorder="big", signed=True)
     response = req_len + message_bytes
     conn.sendall(response)
-    conn.close()
+    # conn.close()
 
 
 if __name__ == "__main__":
