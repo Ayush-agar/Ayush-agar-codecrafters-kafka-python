@@ -19,7 +19,7 @@ def main():
     # print(f"correlation_id {correlation_id}")
     # print(f"data from client {data.decode()}")
     # conn.sendall(b"hello from the server side")
-    conn.sendall(message[0].to_bytes(4, signed=True) + correlation_id[0].to_bytes(4, signed=True))
+    conn.sendall(message[0].to_bytes(4, signed=True) + correlation_id[0].to_bytes(4, signed=True) + (35).to_bytes(8, signed=True))
 
 
 
