@@ -43,19 +43,22 @@ def main():
     #              # + (0).to_bytes(1, signed=True) # TAG_BUFFER
     #              + (0).to_bytes(4, signed=True) )# throttle_time_ms
     #              # + (0).to_bytes(1, signed=True) ) # TAG_BUFFER
-    response_body = struct.pack(
-        ">i h i h h h i",   # correlation_id, error_code, num_api_keys, api_key, min_ver, max_ver, throttle_time_ms
-        correlation_id[0],
-        0,                 # error_code = 0 (success)
-        1,                 # num_api_keys
-        18,                # api_key = ApiVersions
-        0,                 # min_version
-        4,                 # max_version
-        0                  # throttle_time_ms
-    )
+    body = struct.pack(
+        ">h i i h h h",
+        0,  # error_code
+        0,  # throttle_time_ms
+        1,  # num_api_keys
+        18,  # api_key
+        0,  # min_version
+        4  # max_version
+    ) + b'\x00'  # api_keys TAG_BUFFER empty
 
-    # Length prefix
+    # Add empty response TAG_BUFFER
+    body += b'\x00'
+
+    response_body = struct.pack(">i", correlation_id[0]) + body
     response = struct.pack(">i", len(response_body)) + response_body
+
     conn.sendall(response)
 
     conn.close()
