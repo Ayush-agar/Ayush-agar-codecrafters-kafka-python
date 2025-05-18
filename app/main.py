@@ -21,7 +21,7 @@ def main():
         value = int.from_bytes(data[offset : offset + v], byteorder="big")
         req_values[k] = value
         offset += v
-    print(req_values)
+    # print(req_values)
     # message= struct.unpack_from('>I', buffer=data, offset=offset) # int32 for message
     # offset += 4
     # print(f"message {message[0]}")
