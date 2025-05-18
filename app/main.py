@@ -63,7 +63,7 @@ def main():
     # response = struct.pack(">i", len(response_body)) + response_body
     # conn.sendall(response)
 
-    conn.close()
+    # conn.close()
 
 
 if __name__ == "__main__":
