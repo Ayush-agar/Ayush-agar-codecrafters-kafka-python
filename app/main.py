@@ -25,8 +25,7 @@ def main():
     correlation_id = struct.unpack_from('>I', buffer=data, offset=8)
     tag_buffer = b"\x00"
     # correlation , error code, num_api_keys, api_key, min_version, max_version, tag_buffer, throttle_time_ms, tag_buffer
-    message_bytes = (((((((((req_values['message_size']).to_bytes(4, signed=True)
-                     + (req_values['correlation_id']).to_bytes(4, signed=True))
+    message_bytes = (((((((((req_values['correlation_id']).to_bytes(4, signed=True))
                      + (0).to_bytes(2, signed=True)) + (1).to_bytes(1, signed=True)
                      + (18).to_bytes(2, signed=True))
                      + (0).to_bytes(2, signed=True))
