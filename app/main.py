@@ -67,9 +67,9 @@ def handler(client_conn, addr):
 
 def main():
     with socket.create_server(("localhost", 9092), reuse_port=True) as server:
-        client_conn, addr = server.accept()
+        # client_conn, addr = server.accept()
         while True:
-            # client_conn, addr = server.accept()
+            client_conn, addr = server.accept()
             # receive
             thread = threading.Thread(target=handler, args=(client_conn, addr), daemon=True)
             thread.start()
