@@ -51,7 +51,7 @@ def create_response(request: Request) -> bytes:
     except RequestValidationException as ex:
         error_bytes = ex.code.to_bytes(2, byteorder="big", signed=True)
     message_bytes += error_bytes
-    message_bytes += int(2).to_bytes(1, byteorder="big", signed=True)
+    message_bytes += int(3).to_bytes(1, byteorder="big", signed=True)
     message_bytes += request.request_api_key.to_bytes(2, byteorder="big", signed=True)
     message_bytes += min_version.to_bytes(2, byteorder="big", signed=True)
     message_bytes += max_version.to_bytes(2, byteorder="big", signed=True)
