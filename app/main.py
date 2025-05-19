@@ -52,14 +52,16 @@ def create_response(request: Request) -> bytes:
         error_bytes = ex.code.to_bytes(2, byteorder="big", signed=True)
     message_bytes += error_bytes
     message_bytes += int(3).to_bytes(1, byteorder="big", signed=True)
-    message_bytes += request.request_api_key.to_bytes(2, byteorder="big", signed=True)
-    message_bytes += min_version.to_bytes(2, byteorder="big", signed=True)
-    message_bytes += max_version.to_bytes(2, byteorder="big", signed=True)
-    message_bytes += tag_buffer
-    message_bytes += request.request_api_key.to_bytes(2, byteorder="big", signed=True)
-    message_bytes += int(0).to_bytes(2, byteorder="big", signed=True)
-    message_bytes += int(0).to_bytes(2, byteorder="big", signed=True)
-    message_bytes += tag_buffer
+    if request.request_api_key == 18:
+        message_bytes += request.request_api_key.to_bytes(2, byteorder="big", signed=True)
+        message_bytes += min_version.to_bytes(2, byteorder="big", signed=True)
+        message_bytes += max_version.to_bytes(2, byteorder="big", signed=True)
+        message_bytes += tag_buffer
+    elif request.request_api_key == 75:
+        message_bytes += request.request_api_key.to_bytes(2, byteorder="big", signed=True)
+        message_bytes += int(0).to_bytes(2, byteorder="big", signed=True)
+        message_bytes += int(0).to_bytes(2, byteorder="big", signed=True)
+        message_bytes += tag_buffer
     message_bytes += throttle_time_ms.to_bytes(4, byteorder="big", signed=True)
     message_bytes += tag_buffer
     req_len = len(message_bytes).to_bytes(4, byteorder="big", signed=True)
