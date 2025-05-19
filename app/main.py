@@ -30,12 +30,16 @@ class Request:
             raise ApiVersionInvalidException
 def parse_request_length(header: bytes) -> int:
     return int.from_bytes(header, byteorder="big", signed=True)
+
 def parse_request(request: bytes) -> Request:
     request_api_key = int.from_bytes(request[:2], byteorder="big", signed=True)
     request_api_version = int.from_bytes(request[2:4], byteorder="big", signed=True)
     correlation_id = int.from_bytes(request[4:8], byteorder="big", signed=True)
     client_id = bytes.decode(request[8:], "utf-8")
+    print("request_api_key, request_api_version, correlation_id, client_id ====== ")
+    print(request_api_key, request_api_version, correlation_id, client_id)
     return Request(request_api_key, request_api_version, correlation_id, client_id)
+
 def create_response(request: Request) -> bytes:
     message_bytes = request.correlation_id.to_bytes(4, byteorder="big", signed=True)
     min_version, max_version = 0, 4
