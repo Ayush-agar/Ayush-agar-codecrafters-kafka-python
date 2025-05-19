@@ -15,23 +15,25 @@ def main():
             # data = conn.recv(12)
             print(f"data {data}")
             # print(f"data {conn.recv(1024)}")
-            REQUEST_STRUCT = {
-                "message_size": 4,
-                "request_api_key": 2,
-                "request_api_version": 2,
-                "correlation_id": 4,
-            }
-            REQUEST_SIZE = sum(size for size in REQUEST_STRUCT.values())
-            req_values = dict()
-            offset = 0
-            for k, v in REQUEST_STRUCT.items():
-                value = int.from_bytes(data[offset : offset + v], byteorder="big")
-                req_values[k] = value
-                offset += v
-            print(req_values)
+            # REQUEST_STRUCT = {
+            #     "message_size": 4,
+            #     "request_api_key": 2,
+            #     "request_api_version": 2,
+            #     "correlation_id": 4,
+            # }
+            # REQUEST_SIZE = sum(size for size in REQUEST_STRUCT.values())
+            # req_values = dict()
+            # offset = 0
+            # for k, v in REQUEST_STRUCT.items():
+            #     value = int.from_bytes(data[offset : offset + v], byteorder="big")
+            #     req_values[k] = value
+            #     offset += v
+            # print(req_values)
             request_api_key = int.from_bytes(data[:2], byteorder="big", signed=True)
             request_api_version = int.from_bytes(data[2:4], byteorder="big", signed=True)
             correlation_id = int.from_bytes(data[4:8], byteorder="big", signed=True)
+            print("correlation_id, request_api_key====")
+            print(correlation_id, request_api_key)
             client_id = bytes.decode(data[8:], "utf-8")
             # correlation_id = struct.unpack_from('>I', buffer=data, offset=8)
             tag_buffer = b"\x00"
@@ -45,13 +47,13 @@ def main():
             message_bytes += tag_buffer
             message_bytes += int(0).to_bytes(4, signed=True)
             message_bytes += tag_buffer
-            print(message_bytes)
-            print(len(message_bytes))
-            print(req_values['message_size'])
-            print(int.from_bytes(data[0:4], byteorder="big"))
+            # print(message_bytes)
+            # print(len(message_bytes))
+            # print(req_values['message_size'])
+            # print(int.from_bytes(data[0:4], byteorder="big"))
             req_len = len(message_bytes).to_bytes(4, byteorder="big", signed=True)
             response = req_len + message_bytes
-            print(response)
+            # print(response)
             conn.sendall(response)
             # conn.close()
         except Exception as e:
