@@ -58,12 +58,13 @@ def create_response(request: Request) -> bytes:
     response = req_len + message_bytes
     return response
 def handler(client_conn, addr):
-    message_len = parse_request_length(client_conn.recv(4))
-    request_bytes = client_conn.recv(message_len + 8)
-    # create response
-    response = create_response(parse_request(request_bytes))
-    # send response
-    client_conn.sendall(response)
+    while True:
+        message_len = parse_request_length(client_conn.recv(4))
+        request_bytes = client_conn.recv(message_len + 8)
+        # create response
+        response = create_response(parse_request(request_bytes))
+        # send response
+        client_conn.sendall(response)
 
 def main():
     with socket.create_server(("localhost", 9092), reuse_port=True) as server:
@@ -71,9 +72,8 @@ def main():
         while True:
             client_conn, addr = server.accept()
             # receive
-            while True:
-                thread = threading.Thread(target=handler, args=(client_conn, addr), daemon=True)
-                thread.start()
+            thread = threading.Thread(target=handler, args=(client_conn, addr), daemon=True)
+            thread.start()
 
 if __name__ == "__main__":
     main()
