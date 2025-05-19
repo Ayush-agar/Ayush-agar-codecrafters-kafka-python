@@ -37,7 +37,7 @@ def main():
         # correlation , error code, num_api_keys, api_key, min_version, max_version, tag_buffer, throttle_time_ms, tag_buffer
         message_bytes = correlation_id.to_bytes(4, signed=True)
         message_bytes += int(0).to_bytes(2, signed=True)
-        message_bytes += int(1).to_bytes(1, signed=True)
+        message_bytes += int(2).to_bytes(1, signed=True)
         message_bytes += int(request_api_key).to_bytes(2, signed=True)
         message_bytes += int(0).to_bytes(2, signed=True)
         message_bytes += int(4).to_bytes(2, signed=True)
