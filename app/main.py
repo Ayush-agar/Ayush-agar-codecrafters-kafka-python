@@ -71,8 +71,9 @@ def main():
         while True:
             client_conn, addr = server.accept()
             # receive
-            thread = threading.Thread(target=handler, args=(client_conn, addr), daemon=True)
-            thread.start()
+            while True:
+                thread = threading.Thread(target=handler, args=(client_conn, addr), daemon=True)
+                thread.start()
 
 if __name__ == "__main__":
     main()
