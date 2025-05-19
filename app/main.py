@@ -56,6 +56,10 @@ def create_response(request: Request) -> bytes:
     message_bytes += min_version.to_bytes(2, byteorder="big", signed=True)
     message_bytes += max_version.to_bytes(2, byteorder="big", signed=True)
     message_bytes += tag_buffer
+    message_bytes += request.request_api_key.to_bytes(2, byteorder="big", signed=True)
+    message_bytes += min_version.to_bytes(2, byteorder="big", signed=True)
+    message_bytes += max_version.to_bytes(2, byteorder="big", signed=True)
+    message_bytes += tag_buffer
     message_bytes += throttle_time_ms.to_bytes(4, byteorder="big", signed=True)
     message_bytes += tag_buffer
     req_len = len(message_bytes).to_bytes(4, byteorder="big", signed=True)
