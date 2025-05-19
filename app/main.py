@@ -57,8 +57,8 @@ def create_response(request: Request) -> bytes:
     message_bytes += max_version.to_bytes(2, byteorder="big", signed=True)
     message_bytes += tag_buffer
     message_bytes += request.request_api_key.to_bytes(2, byteorder="big", signed=True)
-    message_bytes += min_version.to_bytes(2, byteorder="big", signed=True)
-    message_bytes += max_version.to_bytes(2, byteorder="big", signed=True)
+    message_bytes += int(0).to_bytes(2, byteorder="big", signed=True)
+    message_bytes += int(0).to_bytes(2, byteorder="big", signed=True)
     message_bytes += tag_buffer
     message_bytes += throttle_time_ms.to_bytes(4, byteorder="big", signed=True)
     message_bytes += tag_buffer
@@ -68,7 +68,10 @@ def create_response(request: Request) -> bytes:
 def handler(client_conn, addr):
     while True:
         message_len = parse_request_length(client_conn.recv(4))
+        print(f"message_len {message_len}")
         request_bytes = client_conn.recv(message_len + 8)
+        print(f"request_bytes are {request_bytes}")
+        print(int.from_bytes(request_bytes, byteorder="big", signed=True))
         # create response
         response = create_response(parse_request(request_bytes))
         # send response
